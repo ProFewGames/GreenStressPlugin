@@ -14,6 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.ufactions.shop.Shop;
 import xyz.ufactions.shop.ShopItem;
+import xyz.ufactions.updater.UpdateType;
+import xyz.ufactions.updater.event.UpdateEvent;
 
 /**
  * MegaBukkit class (c) Ricardo Barrera 2017-2020
@@ -25,9 +27,13 @@ public class InputRequest {
     }
 
     public static void confirmationInput(final Callback<Boolean> callback, final ItemStack display, final JavaPlugin plugin, final Player player) {
+        confirmationInput(callback, "", display, plugin, player);
+    }
+
+    public static void confirmationInput(final Callback<Boolean> callback, final String additionalInfo, final ItemStack display, final JavaPlugin plugin, final Player player) {
         final boolean[] called = {false};
 
-        Shop shop = new Shop(plugin, C.mHead + "Confirmation", 27, Shop.ShopFiller.PANE,
+        Shop shop = new Shop(plugin, C.mHead + "Confirm " + additionalInfo, 27, Shop.ShopFiller.PANE,
                 new ShopItem(plugin, Material.GREEN_WOOL, C.cGreen + C.Bold + "CONFIRM", 11) {
 
                     @Override
@@ -73,7 +79,7 @@ public class InputRequest {
         Listener listener = new Listener() {
 
             @EventHandler
-            public void onInventorOpen(InventoryOpenEvent e) {
+            public void onInventoryOpen(InventoryOpenEvent e) {
                 if (e.getPlayer() == player) {
                     e.setCancelled(true);
                 }
@@ -85,7 +91,7 @@ public class InputRequest {
 
                 // Check timeout
                 if (UtilTime.elapsed(start, 60000)) {
-                    UtilPlayer.message(player, F.error("Timings", "Didn't receive any input for 60 seconds... Factory timing out"));
+                    player.sendMessage(F.error("Timings", "Didn't receive any input for 60 seconds... Factory timing out"));
                     HandlerList.unregisterAll(this);
                     callback.run(null);
                 } else {

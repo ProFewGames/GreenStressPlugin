@@ -35,6 +35,8 @@ public class C {
     public static String mBody = "" + ChatColor.WHITE;
     public static String mElem = "" + ChatColor.YELLOW;
 
+    public static String Strip = C.mHead + C.Strike + "----------------------------------------";
+
     public static String color(String string) {
         return ChatColor.translateAlternateColorCodes('&', string);
     }

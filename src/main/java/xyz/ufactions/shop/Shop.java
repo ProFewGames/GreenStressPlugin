@@ -16,6 +16,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import xyz.ufactions.libs.ColorLib;
 import xyz.ufactions.libs.ItemBuilder;
 import xyz.ufactions.libs.UtilMath;
+import xyz.ufactions.updater.UpdateType;
+import xyz.ufactions.updater.event.UpdateEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -209,10 +211,6 @@ public class Shop implements Listener {
             preInventoryOpen(player);
             if (inventory == null)
                 inventory = Bukkit.createInventory(null, UtilMath.round(items.size()), name);
-            scheduledId = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-                updateItems();
-                updatePanels();
-            }, 0L, 5L);
             plugin.getServer().getPluginManager().registerEvents(this, plugin);
             player.openInventory(inventory);
             onInventoryOpen(player);
@@ -229,7 +227,9 @@ public class Shop implements Listener {
         return inventory;
     }
 
-    public void updateItems() {
+    @EventHandler
+    public void updateItems(UpdateEvent e) {
+        if (e.getType() != UpdateType.SEC) return;
         if (!updatableItems)
             return;
         for (IButton button : items) {
@@ -237,7 +237,10 @@ public class Shop implements Listener {
         }
     }
 
-    public void updatePanels() {
+    @EventHandler
+    public void updatePanels(UpdateEvent e) {
+        if (e.getType() != UpdateType.FAST) return;
+
         if (filler == ShopFiller.RAINBOW) {
             for (int i = 0; i < inventory.getSize(); i++) {
                 ItemStack item = inventory.getItem(i);
@@ -300,7 +303,6 @@ public class Shop implements Listener {
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> e.getPlayer().openInventory(getInventory()), 1);
                 return;
             }
-            Bukkit.getServer().getScheduler().cancelTask(scheduledId);
             HandlerList.unregisterAll(this);
             onClose((Player) e.getPlayer());
         }

@@ -11,3 +11,5 @@ commands:
     description: Return to spawn
   fly:
     description: Soar through the air like a bird
+  reset:
+    description: Reset the stress world

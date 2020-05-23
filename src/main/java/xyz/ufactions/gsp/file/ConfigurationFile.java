@@ -33,12 +33,20 @@ public class ConfigurationFile {
         return config.getString("join.title.subtitle");
     }
 
+    public List<String> testsTnTMessage() {
+        return config.getStringList("tests.tnt.message");
+    }
+
     public String getFallbackWorld() {
         return config.getString("fallback-world");
     }
 
     public int getMaxPlayers() {
         return config.getInt("max-players");
+    }
+
+    public int stressTnTSize() {
+        return config.getInt("tests.tnt.size");
     }
 
     public boolean joinTitleEnabled() {

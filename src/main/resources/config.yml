@@ -24,6 +24,21 @@ settings:
   pve: false
   pvp: false
 
+tests:
+  tnt:
+    # Keep in mind this number is squared on both the X,Y, and Z
+    # Axis
+    size: 10
+    message:
+      - '&2&l&m-----------------------------------'
+      - '               &a&lGreenBull'
+      - 'This is the GreenBull TNT Test. We''ve loaded'
+      - 'TNT Around your user. When you''re ready just'
+      - 'ignite one block stand back and watch the'
+      - 'magic happen. * To view server TPS execute'
+      - '/tps *'
+      - '&2&l&m-----------------------------------'
+
 join:
   message:
     enabled: true

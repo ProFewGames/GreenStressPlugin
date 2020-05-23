@@ -3,7 +3,9 @@ package xyz.ufactions.gsp.listener;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import xyz.ufactions.gsp.GreenStress;
 
 public class WorldListener implements Listener {
@@ -24,6 +26,11 @@ public class WorldListener implements Listener {
             }
             world.setGameRule(GameRule.DO_WEATHER_CYCLE, plugin.getConfiguration().settingWeather());
         }
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent e) {
+        e.setCancelled(true);
     }
 
     public void updateHandler() {

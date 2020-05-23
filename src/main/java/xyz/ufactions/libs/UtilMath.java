@@ -10,6 +10,9 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
+/**
+ * MegaBukkit class (c) Ricardo Barrera 2017-2020
+ */
 public class UtilMath
 {
 	public static boolean isDouble(String string) {
