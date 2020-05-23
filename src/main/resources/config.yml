@@ -1,0 +1,42 @@
+############################################################
+#                                                          #
+#                      GreenStress                         #
+#                            By:                           #
+#                              ProFewGames                 #
+#                                                          #
+############################################################
+
+# The world that players will go to when they join the server
+# This will be overridden when /stress setspawn is set
+fallback-world: world
+
+# This is the max amount of players allowed on the server
+# Once this number is reached they'll be put in a queue
+# And not allowed on the server until they're id is
+# called.
+max-players: 1
+
+# World Settings
+settings:
+  player-visibility: false # can players see each other
+  daylightCycle: false
+  weatherCycle: false
+  pve: false
+  pvp: false
+
+join:
+  message:
+    enabled: true
+    content:
+      - '&2&l&m-----------------------------------'
+      - '               &a&lGreenBull'
+      - '&fWelcome to our stress testing server! Here'
+      - 'You''ll find numerous different tests ranging'
+      - 'from simulating TNT, Lag Machines, and other'
+      - 'server-intensive mechanics! feel free to look'
+      - 'around and push our server to it''s limits'
+      - '&2&l&m-----------------------------------'
+  title:
+    enabled: true
+    title: '&a&lGreenBull'
+    subtitle: '&f&lWelcome to our test server!'

@@ -1,0 +1,13 @@
+main: xyz.ufactions.gsp.GreenStress
+name: GreenStress
+author: ProFewGames
+api-version: 1.15
+version: 1.15.2
+commands:
+  stress:
+    description: Master command
+    aliases: [greenstress, gs]
+  spawn:
+    description: Return to spawn
+  fly:
+    description: Soar through the air like a bird
