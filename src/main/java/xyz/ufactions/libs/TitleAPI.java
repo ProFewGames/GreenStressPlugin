@@ -1,64 +1,75 @@
 package xyz.ufactions.libs;
 
-import net.minecraft.server.v1_15_R1.ChatMessage;
-import net.minecraft.server.v1_15_R1.Packet;
-import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
-import net.minecraft.server.v1_15_R1.PlayerConnection;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+
+import java.lang.reflect.Field;
 
 /**
  * MegaBukkit class (c) Ricardo Barrera 2017-2020
  */
 public class TitleAPI {
-
     public static void sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             sendTitle(player, title, subtitle, fadeIn, stay, fadeOut);
         }
     }
 
-    public static void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeout) {
-        setTimings(player, fadeIn, stay, fadeout);
-        sendPacket(player, new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, new ChatMessage(title)),
-                new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, new ChatMessage(subtitle)));
+    public static void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        CraftPlayer craftplayer = (CraftPlayer)player;
+        PlayerConnection connection = (craftplayer.getHandle()).playerConnection;
+        IChatBaseComponent titleJSON = IChatBaseComponent.ChatSerializer.a("{'text': '" + title + "'}");
+        IChatBaseComponent subtitleJSON = IChatBaseComponent.ChatSerializer.a("{'text': '" + subtitle + "'}");
+        PacketPlayOutTitle titlePacket = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, titleJSON, fadeIn, stay,
+                fadeOut);
+        PacketPlayOutTitle subtitlePacket = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, subtitleJSON);
+        connection.sendPacket(titlePacket);
+        connection.sendPacket(subtitlePacket);
     }
 
-    @Deprecated
     public static void sendTabHF(String header, String footer) {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            // TODO
+            sendTabHF(player, header, footer);
         }
     }
 
 
-    @Deprecated
     public static void sendTabHF(Player player, String header, String footer) {
-        // TODO
+        CraftPlayer craftplayer = (CraftPlayer)player;
+        PlayerConnection connection = (craftplayer.getHandle()).playerConnection;
+        IChatBaseComponent headerJSON = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + header + "\"}");
+        IChatBaseComponent footerJSON = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + footer + "\"}");
+        PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
+
+        try {
+            Field headerField = packet.getClass().getDeclaredField("a");
+            headerField.setAccessible(true);
+            headerField.set(packet, headerJSON);
+            headerField.setAccessible(headerField.isAccessible() ? false : true);
+
+            Field footerField = packet.getClass().getDeclaredField("b");
+            footerField.setAccessible(true);
+            footerField.set(packet, footerJSON);
+            footerField.setAccessible(footerField.isAccessible() ? false : true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        connection.sendPacket(packet);
     }
 
 
-    public static void sendActionBar(String message, int stay) {
+    public static void sendActionBar(String message) {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            sendActionBar(player, message, stay);
+            sendActionBar(player, message);
         }
     }
 
-    public static void sendActionBar(Player p, String message, int stay) {
-        setTimings(p, 0, stay, 0);
-        sendPacket(p, new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, new ChatMessage(message)));
-    }
-
-    private static void setTimings(Player player, int fadeIn, int stay, int fadeOut) {
-        sendPacket(player, new PacketPlayOutTitle(fadeIn, stay, fadeOut));
-    }
-
-    private static void sendPacket(Player player, Packet<?>... packets) {
-        PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
-
-        for (Packet<?> packet : packets) {
-            connection.sendPacket(packet);
-        }
+    public static void sendActionBar(Player p, String message) {
+        IChatBaseComponent cbc = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + message + "\"}");
+        PacketPlayOutChat ppoc = new PacketPlayOutChat(cbc, (byte) 2);
+        (((CraftPlayer)p).getHandle()).playerConnection.sendPacket(ppoc);
     }
 }

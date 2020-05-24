@@ -17,21 +17,31 @@ import xyz.ufactions.shop.ShopItem;
 public class GreenGUI extends Shop {
 
     public GreenGUI(GreenStress plugin) {
-        super(plugin, "Stress TnT", 27, ShopFiller.RAINBOW, new ShopItem<GreenStress>(plugin, Material.TNT, C.cRed + C.Bold + "TNT ", 13, "* Click me to test TNT explosions *") {
+        super(plugin, "Stress TnT", 27, ShopFiller.RAINBOW,
+                new ShopItem<GreenStress>(plugin, Material.TNT, C.cRed + C.Bold + "TNT ", 11, "* Click me to test TNT explosions *") {
 
-            @Override
-            public void onClick(Player player, ClickType type) {
-                if (plugin.getWorld() != null) {
-                    if (!player.getWorld().equals(plugin.getWorld())) {
-                        player.teleport(plugin.getWorld().getSpawnLocation());
+                    @Override
+                    public void onClick(Player player, ClickType type) {
+                        player.closeInventory();
+                        if (plugin.getWorld() != null) {
+                            if (!player.getWorld().equals(plugin.getWorld())) {
+                                player.teleport(plugin.getWorld().getSpawnLocation());
+                            }
+                        } else {
+                            plugin.generateNew(world -> pasteTnT(plugin, player), true);
+                            return;
+                        }
+                        pasteTnT(plugin, player);
                     }
-                } else {
-                    plugin.generateNew(world -> pasteTnT(plugin, player), true);
-                    return;
-                }
-                pasteTnT(plugin, player);
-            }
-        });
+                },
+                new ShopItem<GreenStress>(plugin, Material.WATCH, C.cGreen + C.Bold + "Lag Tracker", 15, "* Click me to view server status *") {
+
+                    @Override
+                    public void onClick(Player player, ClickType clickType) {
+                        player.closeInventory();
+                        player.performCommand("lagassist:lagassist statsbar");
+                    }
+                });
     }
 
     private static void pasteTnT(GreenStress plugin, Player player) {
@@ -64,8 +74,8 @@ public class GreenGUI extends Shop {
 
         player.teleport(max.toLocation(player.getWorld()));
 
-        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_YES, 1f, 1f);
-        
+        player.playSound(player.getLocation(), Sound.VILLAGER_YES, 1f, 1f);
+
         for (String string : plugin.getConfiguration().testsTnTMessage()) {
             player.sendMessage(C.color(string));
         }

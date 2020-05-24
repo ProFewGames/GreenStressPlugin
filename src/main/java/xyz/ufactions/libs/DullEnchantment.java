@@ -1,58 +1,40 @@
 package xyz.ufactions.libs;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Locale;
 
 /**
  * MegaBukkit class (c) Ricardo Barrera 2017-2020
  */
-public class DullEnchantment extends Enchantment {
-
+public class DullEnchantment
+        extends EnchantmentWrapper {
     public DullEnchantment() {
-        super(new NamespacedKey("MegaBukkit".toLowerCase(Locale.ROOT), "Glow".toLowerCase(Locale.ROOT)));
+        super(120);
     }
 
-    @Override
-    public String getName() {
-        return "Glow";
+    public boolean canEnchantItem(ItemStack item) {
+        return true;
     }
 
-    @Override
-    public int getMaxLevel() {
-        return 1;
+    public boolean conflictsWith(Enchantment other) {
+        return false;
     }
 
-    @Override
-    public int getStartLevel() {
-        return 0;
-    }
-
-    @Override
     public EnchantmentTarget getItemTarget() {
         return null;
     }
 
-    @Override
-    public boolean isTreasure() {
-        return false;
+    public int getMaxLevel() {
+        return 1;
     }
 
-    @Override
-    public boolean isCursed() {
-        return false;
+    public String getName() {
+        return "Glow";
     }
 
-    @Override
-    public boolean conflictsWith(Enchantment enchantment) {
-        return false;
-    }
-
-    @Override
-    public boolean canEnchantItem(ItemStack itemStack) {
-        return true;
+    public int getStartLevel() {
+        return 1;
     }
 }

@@ -85,7 +85,6 @@ public class ConfigurationFile {
         }
         this.config = YamlConfiguration.loadConfiguration(file);
         plugin.getQueue().setMaxOnline(getMaxPlayers());
-        plugin.getWorldListener().updateHandler();
         plugin.getLogger().info("Reloaded configuration");
     }
 

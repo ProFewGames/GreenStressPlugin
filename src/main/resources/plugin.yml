@@ -1,8 +1,7 @@
 main: xyz.ufactions.gsp.GreenStress
 name: GreenStress
 author: ProFewGames
-api-version: 1.15
-version: 1.15.2
+version: 1.8.8
 commands:
   stress:
     description: Master command
@@ -13,3 +12,16 @@ commands:
     description: Soar through the air like a bird
   reset:
     description: Reset the stress world
+  weather:
+    description: Manipulate worlds
+    aliases: [toggledownfall, norain, time, day, night, sunset]
+  world:
+    description: Teleport or view worlds
+  lag:
+    description: View the server info
+    aliases: [tps, gc, lag, mem, memory, uptime]
+permissions:
+  stress.command.admin:
+    description: Administrator permissions
+  weather.command:
+    description: Weather GUI Command

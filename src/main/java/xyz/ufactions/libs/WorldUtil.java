@@ -1,15 +1,12 @@
 package xyz.ufactions.libs;
 
-import com.google.common.base.Preconditions;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
-import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.generator.ChunkGenerator;
@@ -18,9 +15,6 @@ import java.io.File;
 
 /**
  * MegaBukkit class (c) Ricardo Barrera 2017-2020
- * <p>
- * CONVERSION TO 1.15.2 PROVIDED BY ProFewGames
- * ORIGINAL CODE PROVIDED BY MD_5
  */
 public class WorldUtil {
 
@@ -33,11 +27,10 @@ public class WorldUtil {
      * @return A new world
      */
     public static World fastCreateWorld(WorldCreator creator) {
+        Validate.notNull(creator, "Creator may not be null");
+
         CraftServer server = (CraftServer) Bukkit.getServer();
         MinecraftServer console = server.getServer();
-
-        Preconditions.checkState(!console.worldServer.isEmpty(), "Cannot create additional worlds on STARTUP");
-        Validate.notNull(creator, "Creator may not be null");
 
         String name = creator.name();
         ChunkGenerator generator = creator.generator();
@@ -58,13 +51,33 @@ public class WorldUtil {
             generator = server.getGenerator(name);
         }
 
-        console.convertWorld(name);
+        Convertable converter = new WorldLoaderServer(server.getWorldContainer());
+        if (converter.isConvertable(name)) {
+            server.getLogger().info("Converting world '" + name + "'");
+            converter.convert(name, new IProgressUpdate() {
+                private long b = System.currentTimeMillis();
 
-        int dimension = CraftWorld.CUSTOM_DIMENSION_OFFSET + console.worldServer.size();
+                public void a(String s) {
+                }
+
+                public void a(int i) {
+                    if (System.currentTimeMillis() - this.b >= 1000L) {
+                        this.b = System.currentTimeMillis();
+                        MinecraftServer.LOGGER.info("Converting... " + i + "%");
+                    }
+
+                }
+
+                public void c(String s) {
+                }
+            });
+        }
+
+        int dimension = CraftWorld.CUSTOM_DIMENSION_OFFSET + console.worlds.size();
         boolean used = false;
         do {
-            for (WorldServer s : console.getWorlds()) {
-                used = s.getWorldProvider().getDimensionManager().getDimensionID() == dimension;
+            for (WorldServer s : console.worlds) {
+                used = s.dimension == dimension;
                 if (used) {
                     dimension++;
                     break;
@@ -73,66 +86,34 @@ public class WorldUtil {
         } while (used);
         boolean hardcore = false;
 
-        WorldNBTStorage sdm = new WorldNBTStorage(server.getWorldContainer(), name, server.getServer(), server.getHandle().getServer().dataConverterManager);
+        IDataManager sdm = new ServerNBTManager(server.getWorldContainer(), name, true);
         WorldData worlddata = sdm.getWorldData();
-        WorldSettings worldSettings;
-        // See MinecraftServer.a(String, String, long, WorldType, JsonElement)
         if (worlddata == null) {
-            worldSettings = new WorldSettings(creator.seed(), EnumGamemode.getById(server.getDefaultGameMode().getValue()), generateStructures, hardcore, type);
-            JsonElement parsedSettings = new JsonParser().parse(creator.generatorSettings());
-            if (parsedSettings.isJsonObject()) {
-                worldSettings.setGeneratorSettings(parsedSettings.getAsJsonObject());
-            }
+            WorldSettings worldSettings = new WorldSettings(creator.seed(), WorldSettings.EnumGamemode.getById(server.getDefaultGameMode().getValue()), generateStructures, hardcore, type);
+            worldSettings.setGeneratorSettings(creator.generatorSettings());
             worlddata = new WorldData(worldSettings, name);
-        } else {
-            worlddata.setName(name);
-            worldSettings = new WorldSettings(worlddata);
         }
+        worlddata.checkName(name); // CraftBukkit - Migration did not rewrite the level.dat; This forces 1.8 to take the last loaded world as respawn (in this case the end)
+        WorldServer internal = (WorldServer) new WorldServer(console, sdm, worlddata, dimension, console.methodProfiler, creator.environment(), generator).b();
 
-        DimensionManager actualDimension = DimensionManager.a(creator.environment().getId());
-        DimensionManager internalDimension = DimensionManager.register(name.toLowerCase(java.util.Locale.ENGLISH), new DimensionManager(dimension, actualDimension.getSuffix(), actualDimension.folder, (w, manager) -> actualDimension.providerFactory.apply(w, manager), actualDimension.hasSkyLight(), actualDimension.getGenLayerZoomer(), actualDimension));
-        WorldServer internal = (WorldServer) new WorldServer(console, console.executorService, sdm, worlddata, internalDimension, console.getMethodProfiler(), server.getServer().worldLoadListenerFactory.create(11), creator.environment(), generator);
-
-        if (!(server.getWorld(name.toLowerCase(java.util.Locale.ENGLISH)) != null)) {
+        if (!(server.getWorld(name.toLowerCase()) != null)) {
             return null;
         }
 
-        console.initWorld(internal, worlddata, worldSettings);
+        internal.scoreboard = server.getScoreboardManager().getMainScoreboard().getHandle();
 
+        internal.tracker = new EntityTracker(internal);
+        internal.addIWorldAccess(new WorldManager(console, internal));
         internal.worldData.setDifficulty(EnumDifficulty.EASY);
         internal.setSpawnFlags(true, true);
-        console.worldServer.put(internal.getWorldProvider().getDimensionManager(), internal);
+        console.worlds.add(internal);
+
+        if (generator != null) {
+            internal.getWorld().getPopulators().addAll(generator.getDefaultPopulators(internal.getWorld()));
+        }
 
         Bukkit.getPluginManager().callEvent(new WorldInitEvent(internal.getWorld()));
         Bukkit.getPluginManager().callEvent(new WorldLoadEvent(internal.getWorld()));
         return internal.getWorld();
-    }
-
-    private static void convertWorld(String name) {
-        MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
-        if (server.getConvertable().isConvertable(name)) {
-            server.info("Converting map!");
-            server.getConvertable().convert(name, new IProgressUpdate() {
-                private long b = SystemUtils.getMonotonicMillis();
-
-                @Override
-                public void a(IChatBaseComponent iChatBaseComponent) {
-                }
-
-                @Override
-                public void c(IChatBaseComponent iChatBaseComponent) {
-                }
-
-                @Override
-                public void a(int i) {
-                    if (SystemUtils.getMonotonicMillis() - this.b >= 1000L) {
-                        this.b = SystemUtils.getMonotonicMillis();
-                        MinecraftServer.LOGGER.info("Converting... {}%", i);
-                    }
-                }
-            });
-        }
-
-        // XXX Force Upgrade?
     }
 }

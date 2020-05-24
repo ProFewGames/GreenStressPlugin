@@ -11,6 +11,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import xyz.ufactions.gsp.GreenStress;
 import xyz.ufactions.gsp.gui.GreenGUI;
 import xyz.ufactions.libs.*;
@@ -46,7 +47,7 @@ public class PlayerListener implements Listener {
         player.teleport(plugin.getSpawn());
 
         if (plugin.getConfiguration().joinMessageEnabled()) {
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_YES, 1f, 1f);
+            player.playSound(player.getLocation(), Sound.VILLAGER_YES, 1f, 1f);
             for (String string : plugin.getConfiguration().joinMessageContent()) {
                 player.sendMessage(C.color(string));
             }
@@ -54,8 +55,8 @@ public class PlayerListener implements Listener {
 
         if (!plugin.getConfiguration().settingPlayerVisibility()) {
             for (Player other : Bukkit.getOnlinePlayers()) {
-                player.hidePlayer(plugin, other);
-                other.hidePlayer(plugin, player);
+                player.hidePlayer(other);
+                other.hidePlayer(player);
             }
         }
 
@@ -66,18 +67,18 @@ public class PlayerListener implements Listener {
                 .lore("", C.cGray + "You're currently on the test.green-bull.net", C.cGray + "We hope you're satisfied with our services!", "", C.mHead + "WEBSITE " + C.cWhite + "» " + C.cDGreen + "green-bull.in",
                         C.mHead + "PANEL " + C.cWhite + "» " + C.cDGreen + "panel.green-bull.in", C.mHead + "DISCORD " + C.cWhite + "» " + C.cDGreen + "discord.gg/green-bull").build());
 
-        player.getInventory().setItem(0, new ItemBuilder(Material.GREEN_STAINED_GLASS_PANE).name(" ").build());
-        player.getInventory().setItem(8, new ItemBuilder(Material.GREEN_STAINED_GLASS_PANE).name(" ").build());
-        player.getInventory().setItem(9, new ItemBuilder(Material.GREEN_STAINED_GLASS_PANE).name(" ").build());
-        player.getInventory().setItem(17, new ItemBuilder(Material.GREEN_STAINED_GLASS_PANE).name(" ").build());
-        player.getInventory().setItem(18, new ItemBuilder(Material.GREEN_STAINED_GLASS_PANE).name(" ").build());
-        player.getInventory().setItem(26, new ItemBuilder(Material.GREEN_STAINED_GLASS_PANE).name(" ").build());
-        player.getInventory().setItem(27, new ItemBuilder(Material.GREEN_STAINED_GLASS_PANE).name(" ").build());
-        player.getInventory().setItem(35, new ItemBuilder(Material.GREEN_STAINED_GLASS_PANE).name(" ").build());
+        player.getInventory().setItem(0, new ItemBuilder(Material.STAINED_GLASS_PANE, 13).name(" ").build());
+        player.getInventory().setItem(8, new ItemBuilder(Material.STAINED_GLASS_PANE, 13).name(" ").build());
+        player.getInventory().setItem(9, new ItemBuilder(Material.STAINED_GLASS_PANE, 13).name(" ").build());
+        player.getInventory().setItem(17, new ItemBuilder(Material.STAINED_GLASS_PANE, 13).name(" ").build());
+        player.getInventory().setItem(18, new ItemBuilder(Material.STAINED_GLASS_PANE, 13).name(" ").build());
+        player.getInventory().setItem(26, new ItemBuilder(Material.STAINED_GLASS_PANE, 13).name(" ").build());
+        player.getInventory().setItem(27, new ItemBuilder(Material.STAINED_GLASS_PANE, 13).name(" ").build());
+        player.getInventory().setItem(35, new ItemBuilder(Material.STAINED_GLASS_PANE, 13).name(" ").build());
 
         for (int i = 0; i < 36; i++) {
             if (player.getInventory().getItem(i) == null) {
-                player.getInventory().setItem(i, new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).name(" ").build());
+                player.getInventory().setItem(i, new ItemBuilder(Material.STAINED_GLASS_PANE, 5).name(" ").build());
             }
         }
 
@@ -87,6 +88,11 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        e.setQuitMessage(null);
+    }
+
+//    @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
         e.setCancelled(true);
     }
@@ -99,7 +105,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
         if (UtilEvent.isAction(e, UtilEvent.ActionType.R) || UtilEvent.isAction(e, UtilEvent.ActionType.L)) {
-            if (UtilInv.IsItem(e.getPlayer().getInventory().getItemInMainHand(), C.mHead + "Stressing Options", Material.COMPASS, (byte) 0))
+            if (UtilInv.IsItem(e.getPlayer().getInventory().getItemInHand(), C.mHead + "Stressing Options", Material.COMPASS, (byte) 0))
                 new GreenGUI(plugin).openInventory(e.getPlayer());
         }
     }

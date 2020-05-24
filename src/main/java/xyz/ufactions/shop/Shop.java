@@ -3,7 +3,6 @@ package xyz.ufactions.shop;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.data.type.GlassPane;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -13,7 +12,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import xyz.ufactions.libs.ColorLib;
 import xyz.ufactions.libs.ItemBuilder;
 import xyz.ufactions.libs.UtilMath;
 import xyz.ufactions.updater.UpdateType;
@@ -76,7 +74,7 @@ public class Shop implements Listener {
                 continue;
             }
             if (filler == ShopFiller.PANE) {
-                inventory.setItem(i, new ItemBuilder(Material.WHITE_STAINED_GLASS_PANE).name(" ").build());
+                inventory.setItem(i, new ItemBuilder(Material.STAINED_GLASS_PANE, 11).name(" ").build());
             }
         }
     }
@@ -97,7 +95,7 @@ public class Shop implements Listener {
             if (filler == ShopFiller.NONE)
                 continue;
             if (filler == ShopFiller.PANE)
-                inventory.setItem(i, new ItemBuilder(Material.WHITE_STAINED_GLASS_PANE).name(" ").build());
+                inventory.setItem(i, new ItemBuilder(Material.STAINED_GLASS_PANE, 11).name(" ").build());
         }
     }
 
@@ -118,7 +116,7 @@ public class Shop implements Listener {
                 continue;
             if (filler == ShopFiller.PANE)
 
-                inventory.setItem(i, new ItemBuilder(Material.WHITE_STAINED_GLASS_PANE).name(" ").build());
+                inventory.setItem(i, new ItemBuilder(Material.STAINED_GLASS_PANE, 11).name(" ").build());
         }
     }
 
@@ -137,8 +135,7 @@ public class Shop implements Listener {
             if (filler == ShopFiller.NONE)
                 continue;
             if (filler == ShopFiller.PANE)
-
-                inventory.setItem(i, new ItemBuilder(Material.WHITE_STAINED_GLASS_PANE).name(" ").build());
+                inventory.setItem(i, new ItemBuilder(Material.STAINED_GLASS_PANE, 11).name(" ").build());
         }
     }
 
@@ -239,13 +236,15 @@ public class Shop implements Listener {
 
     @EventHandler
     public void updatePanels(UpdateEvent e) {
-        if (e.getType() != UpdateType.FAST) return;
+        if (e.getType() != UpdateType.FAST)
+            return;
 
         if (filler == ShopFiller.RAINBOW) {
             for (int i = 0; i < inventory.getSize(); i++) {
                 ItemStack item = inventory.getItem(i);
-                if (item == null || item.getType().data.equals(GlassPane.class)) {
-                    inventory.setItem(i, new ItemBuilder(ColorLib.cp(ChatColor.values()[UtilMath.r(ChatColor.values().length)])).name(" ").build());
+                if (item == null || item.getType() == Material.STAINED_GLASS_PANE) {
+                    inventory.setItem(i,
+                            new ItemBuilder(Material.STAINED_GLASS_PANE, random.nextInt(15)).name(" ").build());
                 }
             }
         }

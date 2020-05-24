@@ -23,6 +23,8 @@ settings:
   weatherCycle: false
   pve: false
   pvp: false
+  block-breaking: false
+  block-placing: false
 
 tests:
   tnt:

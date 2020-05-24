@@ -39,6 +39,10 @@ public class F {
         return C.mElem + elem + ChatColor.RESET + C.mBody;
     }
 
+    public static String oo(boolean val) {
+        return (val ? C.cGreen + "on" : C.cRed + "off") + C.mBody;
+    }
+
     public static String ed(boolean val) {
         return (val ? C.cGreen + "enabled" : C.cRed + "disabled") + C.mBody;
     }
@@ -67,7 +71,7 @@ public class F {
         return string;
     }
 
-    private static String format(double paramDouble) {
+    public static String format(double paramDouble) {
         NumberFormat localNumberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 
         localNumberFormat.setMaximumFractionDigits(2);

@@ -34,7 +34,7 @@ public class InputRequest {
         final boolean[] called = {false};
 
         Shop shop = new Shop(plugin, C.mHead + "Confirm " + additionalInfo, 27, Shop.ShopFiller.PANE,
-                new ShopItem(plugin, Material.GREEN_WOOL, C.cGreen + C.Bold + "CONFIRM", 11) {
+                new ShopItem(plugin, Material.WOOL, 13, C.cGreen + C.Bold + "CONFIRM", 11) {
 
                     @Override
                     public void onClick(Player player, ClickType clickType) {
@@ -43,7 +43,7 @@ public class InputRequest {
                         player.closeInventory();
                     }
                 },
-                new ShopItem(plugin, Material.RED_WOOL, C.cRed + C.Bold + "DENY", 15) {
+                new ShopItem(plugin, Material.WOOL, 14, C.cRed + C.Bold + "DENY", 15) {
 
                     @Override
                     public void onClick(Player player, ClickType clickType) {

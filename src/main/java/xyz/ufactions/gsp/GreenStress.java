@@ -1,26 +1,25 @@
 package xyz.ufactions.gsp;
 
-import org.bukkit.*;
-import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
-import org.bukkit.entity.Player;
+import org.apache.commons.io.FileUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.plugin.java.JavaPlugin;
-import xyz.ufactions.gsp.command.FlyCommand;
-import xyz.ufactions.gsp.command.ResetCommand;
-import xyz.ufactions.gsp.command.SpawnCommand;
-import xyz.ufactions.gsp.command.StressCommand;
+import xyz.ufactions.gsp.command.*;
 import xyz.ufactions.gsp.file.ConfigurationFile;
 import xyz.ufactions.gsp.file.DataFile;
 import xyz.ufactions.gsp.listener.PlayerListener;
 import xyz.ufactions.gsp.listener.WorldListener;
-import xyz.ufactions.libs.C;
-import xyz.ufactions.libs.Callback;
-import xyz.ufactions.libs.F;
-import xyz.ufactions.libs.UtilLoc;
+import xyz.ufactions.libs.*;
+import xyz.ufactions.monitor.LagMeter;
 import xyz.ufactions.queue.QueueManager;
 import xyz.ufactions.updater.Updater;
+import xyz.ufactions.weather.WeatherModule;
 
 public class GreenStress extends JavaPlugin {
 
+    private WeatherModule weather;
     private QueueManager queue;
     private WorldListener worldListener;
 
@@ -41,17 +40,14 @@ public class GreenStress extends JavaPlugin {
         getCommand("fly").setExecutor(new FlyCommand());
         getCommand("reset").setExecutor(new ResetCommand(this));
         getCommand("spawn").setExecutor(new SpawnCommand(this));
+        getCommand("world").setExecutor(new WorldCommand(this));
+        getCommand("lag").setExecutor(new LagCommand());
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
         new Updater(this); // Start Updater
 
-        // Start flying particles
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.isFlying()) {
-                    player.spawnParticle(Particle.CLOUD, player.getLocation(), 5);
-                }
-            }
-        }, 5L, 5L);
+        LagMeter.initialize(this);
+
+        this.weather = new WeatherModule(this, true);
     }
 
     @Override
@@ -78,8 +74,8 @@ public class GreenStress extends JavaPlugin {
                 Bukkit.broadcastMessage(F.main("GreenBull", "Generating new world"));
             }
             long epoch = System.currentTimeMillis();
-            this.world = Bukkit.createWorld(new WorldCreator("stress"));
-//            this.world = WorldUtil.fastCreateWorld(new WorldCreator("stress"));
+//            this.world = Bukkit.createWorld(new WorldCreator("stress"));
+            this.world = WorldUtil.fastCreateWorld(new WorldCreator("stress"));
             if (world == null) {
                 if (notify) {
                     Bukkit.broadcastMessage(F.main("GreenBull", "hmmm... Something went wrong notify a server admin!"));
@@ -88,11 +84,10 @@ public class GreenStress extends JavaPlugin {
                 if (notify) {
                     Bukkit.broadcastMessage(F.main("GreenBull", "World " + F.elem(world.getName()) + " generated in " + F.elem(String.valueOf(System.currentTimeMillis() - epoch)) + "ms."));
                 }
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    player.teleport(world.getSpawnLocation());
-                }
+                Bukkit.getOnlinePlayers().forEach(player -> player.teleport(world.getSpawnLocation()));
             }
-            callback.run(world);
+            if (callback != null)
+                callback.run(world);
         }, 5L);
     }
 
@@ -143,5 +138,9 @@ public class GreenStress extends JavaPlugin {
 
     public WorldListener getWorldListener() {
         return worldListener;
+    }
+
+    public WeatherModule getWeather() {
+        return weather;
     }
 }
